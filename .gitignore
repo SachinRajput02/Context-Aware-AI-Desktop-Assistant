@@ -12,7 +12,7 @@ node_modules/
 .env
 .env.*
 ai-desktop-assistant.zip
-serverless-state.json
+.serverless/
 
 # Logs
 npm-debug.log*
