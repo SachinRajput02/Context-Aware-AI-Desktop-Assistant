@@ -13,7 +13,7 @@
       "timeout": 60,
       "environment": {
         "NODE_ENV": "production",
-        "GOOGLE_AI_API_KEY": "AIzaSyAtOBUAsUn7kfGHNLKl5vmvG3ZJHRFY5mM",
+        "GOOGLE_AI_API_KEY": "add-your-api-key-here",
         "AWS_DYNAMODB_TABLE_SESSIONS": "ai-assistant-sessions-prod2",
         "AWS_S3_BUCKET": "ai-assistant-screenshots-prod2",
         "VISION_MODEL": "gemini-3.1-flash-lite",

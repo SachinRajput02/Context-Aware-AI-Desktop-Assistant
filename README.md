@@ -142,7 +142,7 @@ Context-Aware-AI-Desktop-Assistant/
 ### Step 1 — Clone and install
 
 ```bash
-git clone <your-repo>
+git clone https://github.com/SachinRajput02/Context-Aware-AI-Desktop-Assistant.git
 cd Context-Aware-AI-Desktop-Assistant
 
 # Backend
