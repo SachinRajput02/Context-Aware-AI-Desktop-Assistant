@@ -1,7 +1,11 @@
+# 🖥️ Context-Aware AI Desktop Assistant
 
-# Context-Aware AI Desktop Assistant
+> A floating desktop overlay that watches your screen, understands what you're doing using AI vision and OCR, and gives you real-time step-by-step guidance.
 
-> A floating desktop overlay that watches your screen, understands what you are doing using AI vision and OCR, and gives you real-time step-by-step guidance.
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
+![Cost](https://img.shields.io/badge/cost-%240%2Fmonth%20(demo)-success)
 
 ---
 
@@ -24,13 +28,15 @@
 
 ## What It Does
 
-- Captures your screen every N seconds automatically
-- Runs OCR on the backend to extract visible text
-- Sends the screenshot to Gemini Vision to understand the UI context
-- Uses Gemma to generate step-by-step contextual guidance
-- Remembers your session history (DynamoDB) to give continuity-aware advice
-- Shows guidance in a floating, always-on-top overlay
-- Optionally reads guidance aloud via Web Speech API
+| Feature | Description |
+|---------|-------------|
+| 📸 **Screen capture** | Captures your screen every N seconds automatically |
+| 🔍 **OCR** | Runs Tesseract OCR on the backend to extract visible text |
+| 👁️ **Vision AI** | Sends the screenshot to Gemini Vision to understand the UI context |
+| 🧠 **LLM guidance** | Uses Gemma to generate step-by-step contextual guidance |
+| 💾 **Session memory** | Remembers your session history via DynamoDB for continuity-aware advice |
+| 🖼️ **Floating overlay** | Shows guidance in an always-on-top overlay |
+| 🔊 **Voice output** | Optionally reads guidance aloud via Web Speech API |
 
 ---
 
@@ -70,13 +76,13 @@ Context-Aware-AI-Desktop-Assistant/
 │   │   │   ├── session.ts        ← session CRUD
 │   │   │   └── health.ts         ← GET /health
 │   │   ├── services/
-│   │   │   ├── visionService.ts      ← Gemini vision (screenshot → JSON)
-│   │   │   ├── llmService.ts         ← Gemma (context → guidance JSON)
-│   │   │   ├── contextService.ts     ← DynamoDB session memory
+│   │   │   ├── visionService.ts           ← Gemini vision (screenshot → JSON)
+│   │   │   ├── llmService.ts              ← Gemma (context → guidance JSON)
+│   │   │   ├── contextService.ts          ← DynamoDB session memory
 │   │   │   ├── intentPredictionService.ts ← rule-based intent detection
-│   │   │   ├── ocrService.ts         ← Tesseract singleton worker
-│   │   │   ├── privacyFilter.ts      ← redact sensitive OCR text
-│   │   │   └── s3Service.ts          ← optional screenshot archival
+│   │   │   ├── ocrService.ts              ← Tesseract singleton worker
+│   │   │   ├── privacyFilter.ts           ← redact sensitive OCR text
+│   │   │   └── s3Service.ts               ← optional screenshot archival
 │   │   ├── middleware/
 │   │   │   └── errorHandler.ts
 │   │   └── utils/logger.ts
@@ -127,7 +133,7 @@ Context-Aware-AI-Desktop-Assistant/
 | AWS CLI | v2 | https://aws.amazon.com/cli |
 | Serverless Framework | v3 | `npm i -g serverless` |
 
-> Tesseract OCR is **no longer required locally** — OCR runs server-side on the backend.
+> **Note:** Tesseract OCR is **no longer required locally** — OCR runs server-side on the backend.
 
 ---
 
@@ -159,11 +165,10 @@ Fill in both `.env` files. See [Environment Variables](#environment-variables) b
 
 ```bash
 aws configure
-# Access Key ID, Secret Key, Region: us-east-1, output: json
+# Prompts for: Access Key ID, Secret Key, Region (us-east-1), output format (json)
 ```
 
-If you skip this, the backend falls back to an in-memory store. Add `SKIP_DYNAMODB=true`
-to `backend/.env` to silence the connection warnings during local dev.
+> If you skip this step, the backend falls back to an in-memory store. Add `SKIP_DYNAMODB=true` to `backend/.env` to silence connection warnings during local development.
 
 ### Step 4 — (Optional) Create AWS resources
 
@@ -172,7 +177,7 @@ cd backend
 npx ts-node scripts/setup-aws.ts
 ```
 
-Creates `ai-assistant-sessions` DynamoDB table and the S3 screenshots bucket.
+This creates the `ai-assistant-sessions` DynamoDB table and the S3 screenshots bucket.
 
 ---
 
@@ -206,7 +211,7 @@ LOG_LEVEL=info
 ### `electron-app/.env`
 
 ```env
-# Use localhost for dev; use your API Gateway URL in production
+# Use localhost for dev; replace with your API Gateway URL in production
 BACKEND_URL=http://localhost:3001
 
 # How often to auto-analyze the screen (milliseconds)
@@ -229,15 +234,13 @@ cd backend && npm run dev
 cd electron-app && npm start
 ```
 
-The floating overlay appears in the bottom-right corner. Press **Ctrl+Shift+A** to analyze
-your screen immediately, or click the ⟳ button in the overlay.
+The floating overlay appears in the bottom-right corner. Press **Ctrl+Shift+A** to analyze your screen immediately, or click the ⟳ button in the overlay.
 
 ---
 
 ## AWS Deployment (Backend)
 
-The backend runs as an AWS Lambda function accessed through API Gateway.
-If you already have it deployed, use these commands to push updated code.
+The backend runs as an AWS Lambda function accessed through API Gateway. Use the following commands to deploy or update the backend.
 
 ### First deployment
 
@@ -253,14 +256,15 @@ npm run build
 serverless deploy --stage prod
 ```
 
-At the end, Serverless prints your API Gateway URL:
+After deployment, Serverless prints your API Gateway URL:
+
 ```
 endpoints:
   POST - https://abc123xyz.execute-api.us-east-1.amazonaws.com/prod/api/orchestrate
   GET  - https://abc123xyz.execute-api.us-east-1.amazonaws.com/prod/health
 ```
 
-Copy that base URL — you need it in the next section.
+Copy that base URL — you'll need it when building the Electron installer.
 
 ### Redeploying after a code change
 
@@ -298,11 +302,11 @@ serverless remove --stage prod
 
 ## Frontend Deployment (Electron Installer)
 
-Electron Forge's make command runs electron-forge package under the hood, which bundles your app code with the Electron binary, then creates OS-specific distributables like DMG, deb, or MSI.
+Electron Forge's `make` command bundles your app code with the Electron binary, then creates OS-specific distributables (DMG, deb, or MSI).
 
 ### Step 1 — Point the app at your production backend
 
-Open `electron-app/.env` and replace localhost with your API Gateway URL:
+Open `electron-app/.env` and replace `localhost` with your API Gateway URL:
 
 ```env
 BACKEND_URL=https://abc123xyz.execute-api.us-east-1.amazonaws.com/prod
@@ -313,7 +317,7 @@ DEBUG=false
 
 ### Step 2 — (Optional) Add an app icon
 
-Place these files in `electron-app/assets/`:
+Place the following files in `electron-app/assets/`:
 
 ```
 electron-app/assets/
@@ -322,7 +326,7 @@ electron-app/assets/
 └── icon.png     ← Linux (512×512)
 ```
 
-Convert a PNG to all three formats free at https://cloudconvert.com/png-to-ico
+> You can convert a PNG to all three formats for free at https://cloudconvert.com/png-to-ico
 
 ### Step 3 — Build the installer
 
@@ -337,9 +341,9 @@ This takes 1–3 minutes. Output goes to `electron-app/out/make/`:
 ```
 out/make/
 ├── squirrel.windows/x64/
-│   └── AI Desktop Assistant Setup.exe    ← Windows installer
+│   └── AI Desktop Assistant Setup.exe          ← Windows installer
 ├── zip/darwin/x64/
-│   └── AI Desktop Assistant-1.0.0.zip   ← macOS (zip)
+│   └── AI Desktop Assistant-1.0.0.zip         ← macOS (zip)
 └── deb/x64/
     └── ai-desktop-assistant_1.0.0_amd64.deb   ← Linux
 ```
@@ -357,20 +361,20 @@ sudo dpkg -i ai-desktop-assistant_1.0.0_amd64.deb
 
 ### Platform notes
 
-- **Windows builds** must be created on a Windows machine.
-- **macOS builds** must be created on a Mac. Users on macOS 13+ will see a
-  Gatekeeper warning on unsigned builds — they can bypass with right-click → Open.
-- **Linux builds** work on Ubuntu, Debian, and derivatives.
+> ⚠️ **Windows builds** must be created on a Windows machine.
 
-### Rebuilding after a backend-only change
+> ⚠️ **macOS builds** must be created on a Mac. Users on macOS 13+ will see a Gatekeeper warning on unsigned builds — they can bypass it with right-click → Open.
 
-If you only changed backend code (model strings, logic, etc.) and redeployed to Lambda,
-the Electron app does **not** need to be rebuilt — it talks to the same API Gateway URL
-and picks up the new backend automatically.
+> ✅ **Linux builds** work on Ubuntu, Debian, and derivatives.
 
-Only rebuild the Electron installer when you change:
+### When to rebuild the Electron installer
+
+If you only changed backend code and redeployed to Lambda, the Electron app does **not** need to be rebuilt — it talks to the same API Gateway URL and picks up backend changes automatically.
+
+Only rebuild the installer when you change:
+
 - Any file in `electron-app/src/`
-- `electron-app/.env` (e.g. changing `BACKEND_URL`)
+- `electron-app/.env` (e.g. a new `BACKEND_URL`)
 - `shared/types.ts`
 
 ---
@@ -387,25 +391,25 @@ Only rebuild the Electron installer when you change:
 
 ## How It Works
 
-1. **Capture** — `desktopCapturer` takes a 1280×720 screenshot and compresses it to JPEG at 75% quality (~150–400 KB)
-2. **Change detection** — if the screen hash matches the previous capture, the API call is skipped entirely to preserve quota
-3. **Send** — the image is posted to `/api/orchestrate` on the backend (Lambda or local Express)
-4. **OCR** — Tesseract.js runs server-side, extracting visible text from the image
-5. **Privacy filter** — credit card numbers, SSNs, and password lines are redacted from the OCR text before it reaches any AI model
-6. **Vision** — `gemini-3.1-flash-lite` receives the screenshot and OCR text, returns a structured JSON description of the UI (screen type, visible buttons, errors detected)
-7. **Context** — DynamoDB retrieves the last 20 interactions for this session, including the inferred user goal and skill level
-8. **Intent prediction** — rule-based pattern matching infers what the user is trying to do
-9. **LLM guidance** — `gemma-4-26b-a4b-it` receives the vision result, context, and intent, returns numbered step-by-step guidance as JSON
-10. **Context update** — the session record in DynamoDB is updated with this interaction
-11. **Response** — the guidance is pushed to the Electron renderer via IPC; the overlay renders numbered steps the user can check off; voice output reads the summary if enabled
+1. **Capture** — `desktopCapturer` takes a 1280×720 screenshot and compresses it to JPEG at 75% quality (~150–400 KB).
+2. **Change detection** — if the screen hash matches the previous capture, the API call is skipped entirely to preserve quota.
+3. **Send** — the image is posted to `/api/orchestrate` on the backend (Lambda or local Express).
+4. **OCR** — Tesseract.js runs server-side, extracting visible text from the image.
+5. **Privacy filter** — credit card numbers, SSNs, and password lines are redacted from the OCR text before it reaches any AI model.
+6. **Vision** — `gemini-3.1-flash-lite` receives the screenshot and OCR text, and returns a structured JSON description of the UI (screen type, visible buttons, errors detected).
+7. **Context** — DynamoDB retrieves the last 20 interactions for this session, including the inferred user goal and skill level.
+8. **Intent prediction** — rule-based pattern matching infers what the user is trying to do.
+9. **LLM guidance** — `gemma-4-26b-a4b-it` receives the vision result, context, and intent, and returns numbered step-by-step guidance as JSON.
+10. **Context update** — the session record in DynamoDB is updated with this interaction.
+11. **Response** — guidance is pushed to the Electron renderer via IPC; the overlay renders numbered steps the user can check off; voice output reads the summary if enabled.
 
 ---
 
 ## Cost
 
-For a demo project with up to 5 users per day (approximately 125 API calls/day):
+Estimated for a demo project with up to 5 users/day (~125 API calls/day):
 
-| Resource | Free tier | Estimated cost |
+| Resource | Free Tier | Estimated Cost |
 |----------|-----------|----------------|
 | Gemini 3.1 Flash Lite (vision) | 500 RPD | $0 |
 | Gemma 4 26B (LLM) | 1,500 RPD | $0 |
@@ -414,17 +418,22 @@ For a demo project with up to 5 users per day (approximately 125 API calls/day):
 | DynamoDB | 25 GB free | $0 |
 | S3 (if enabled) | 5 GB free | $0 |
 
-**Total estimated monthly cost: $0 for a 5-user demo.**
+**Total estimated monthly cost: ~$0.01 for a 5-user demo.**
 
-The main cost driver if you scale up will be the AI API calls, not AWS infrastructure.
-ENDOFFILE
-echo "README written"
-Output
+> The main cost driver at scale will be AI API calls, not AWS infrastructure.
 
-README written
-Done
+---
 
-You are out of free messages until 11:40 PM
-Upgrade
-#   C o n t e x t - A w a r e - A I - D e s k t o p - A s s i s t a n t  
- 
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+
+## Contributing
+
+Pull requests are welcome. For major changes, please open an issue first to discuss what you'd like to change.
+
+---
+
+*Built with [Electron](https://www.electronjs.org/), [Google Gemini](https://ai.google.dev/), [Gemma](https://ai.google.dev/gemma), [Tesseract.js](https://tesseract.projectnaptha.com/), [AWS Lambda](https://aws.amazon.com/lambda/), and [DynamoDB](https://aws.amazon.com/dynamodb/).*
