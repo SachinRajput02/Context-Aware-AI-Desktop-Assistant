@@ -1,0 +1,50 @@
+{
+  "name": "ai-assistant-backend",
+  "version": "1.0.0",
+  "description": "AI Orchestrator backend for the Context-Aware Desktop Assistant",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "node -e \"const fs=require('fs');fs.cpSync('../shared','./src/shared',{recursive:true})\" && tsc",
+    "build:mac": "cp -r ../shared ./src/shared && tsc",
+    "start": "node dist/server.js",
+    "deploy": "serverless deploy",
+    "deploy:prod": "serverless deploy --stage prod",
+    "aws:setup": "ts-node scripts/setup-aws.ts",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.24.0",
+    "@aws-sdk/client-dynamodb": "^3.600.0",
+    "@aws-sdk/client-s3": "^3.600.0",
+    "@aws-sdk/lib-dynamodb": "^3.600.0",
+    "@google/generative-ai": "^0.24.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.3.1",
+    "helmet": "^7.1.0",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
+    "openai": "^4.52.2",
+    "serverless-http": "^4.0.0",
+    "sharp": "^0.33.4",
+    "tesseract.js": "^5.1.0",
+    "uuid": "^10.0.0",
+    "winston": "^3.13.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/morgan": "^1.9.9",
+    "@types/multer": "^1.4.11",
+    "@types/node": "^20.19.40",
+    "@types/uuid": "^10.0.0",
+    "nodemon": "^3.1.14",
+    "serverless-dotenv-plugin": "^6.0.0",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,0 +1,118 @@
+# backend/serverless.yml
+service: ai-desktop-assistant
+
+frameworkVersion: "3"
+
+# ✅ REMOVED serverless-dotenv-plugin — use native v3 dotenv instead
+plugins: []
+
+useDotenv: true   # ✅ This is the Serverless v3 native way to load .env
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: ${env:AWS_REGION, 'ap-south-1'}
+  stage: ${opt:stage, 'dev'}
+  memorySize: 2048
+  timeout: 60
+  environment:
+    NODE_ENV: production
+    GOOGLE_AI_API_KEY: ${env:GOOGLE_AI_API_KEY}
+    AWS_DYNAMODB_TABLE_SESSIONS: ${self:custom.sessionsTable}
+    AWS_S3_BUCKET: ${self:custom.s3Bucket}
+    VISION_MODEL: ${env:VISION_MODEL, 'gemini-2.5-flash'}
+    LLM_MODEL: ${env:LLM_MODEL, 'gemini-2.5-flash'}
+    ENABLE_S3_STORAGE: ${env:ENABLE_S3_STORAGE, 'false'}
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - dynamodb:Query
+            - dynamodb:Scan
+          Resource:
+            - !GetAtt SessionsTable.Arn
+        - Effect: Allow
+          Action:
+            - s3:PutObject
+            - s3:GetObject
+          Resource:
+            - !Sub "arn:aws:s3:::${self:custom.s3Bucket}/*"
+
+custom:
+  sessionsTable: ai-assistant-sessions-${self:provider.stage}
+  s3Bucket: ai-assistant-screenshots-prod2
+
+functions:
+  orchestrate:
+    handler: dist/lambda.handler
+    events:
+      - http:
+          path: /api/orchestrate
+          method: post
+          cors: true
+      - http:
+          path: /api/orchestrate/question
+          method: post
+          cors: true
+
+  session:
+    handler: dist/lambda.handler
+    events:
+      - http:
+          path: /api/session/create
+          method: post
+          cors: true
+      - http:
+          path: /api/session/{sessionId}
+          method: get
+          cors: true
+      - http:
+          path: /api/session/{sessionId}
+          method: delete
+          cors: true
+
+  health:
+    handler: dist/lambda.handler
+    events:
+      - http:
+          path: /health
+          method: get
+          cors: true
+
+resources:
+  Resources:
+    SessionsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.sessionsTable}
+        AttributeDefinitions:
+          - AttributeName: sessionId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: sessionId
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TimeToLiveSpecification:
+          AttributeName: ttl
+          Enabled: true
+
+    ScreenshotsBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.s3Bucket}
+        LifecycleConfiguration:
+          Rules:
+            - Id: DeleteOldScreenshots
+              Status: Enabled
+              ExpirationInDays: 7
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: true
+          BlockPublicPolicy: true
+          IgnorePublicAcls: true
+          RestrictPublicBuckets: true

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      forge+webpack-plugin injects the compiled bundle via its own <script> tag.
+      Do NOT add a <script src="./index.tsx"> here — that file doesn't exist at
+      runtime and would cause a 404. The plugin handles script injection.
+
+      CSP: connect-src allows localhost:3001 (backend) and the webpack dev server.
+    -->
+ <meta
+  http-equiv="Content-Security-Policy"
+  content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' 'unsafe-eval';
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    font-src 'self' https://fonts.gstatic.com;
+    connect-src 'self'
+      http://localhost:3001
+      ws://localhost:9000
+      https://sds9n3ijta.execute-api.ap-south-1.amazonaws.com/prod2;
+    img-src 'self' data:;
+  "
+/>
+    <title>AI Assistant</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body, #root {
+        height: 100%;
+        background: transparent;
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        overflow: hidden;
+        /* Allow drag on the title bar via -webkit-app-region in component styles */
+        user-select: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <!-- forge+webpack injects bundle here automatically -->
+  </body>
+</html>
