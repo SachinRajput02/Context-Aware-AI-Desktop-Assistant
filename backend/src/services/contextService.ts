@@ -25,7 +25,7 @@ const client = new DynamoDBClient({
 });
 
 const docClient = DynamoDBDocumentClient.from(client);
-const TABLE = process.env.AWS_DYNAMODB_TABLE_SESSIONS || "ai-assistant-sessions";
+const TABLE = process.env.AWS_DYNAMODB_TABLE_SESSIONS || "ai-assistant-sessions-prod2";
 
 // In-memory fallback for local dev without DynamoDB
 const memoryStore = new Map<string, SessionContext>();
